@@ -6,8 +6,11 @@ import (
 	"github.com/mburtless/scureshell-cli/internal/pkg/environment"
 )
 
+var EnvId string
+
 func init() {
 	RootCmd.AddCommand(envCmd)
+	envCmd.Flags().StringVarP(&EnvId, "id", "i", "", "Environment ID")
 }
 
 var envCmd = &cobra.Command {
@@ -20,6 +23,10 @@ var envCmd = &cobra.Command {
 			"update\tUpdate environment",
 	Run:	func(cmd *cobra.Command, args []string) {
 		//fmt.Println("dummy env")
-		environment.GetAllEnvs()
+		if EnvId != "" {
+			environment.GetEnvById(EnvId)
+		} else {
+			environment.GetAllEnvs()
+		}
 	},
 }
