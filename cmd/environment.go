@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"fmt"
+	//"fmt"
 	"github.com/spf13/cobra"
+	"github.com/mburtless/scureshell-cli/internal/pkg/environment"
 )
 
 func init() {
@@ -18,6 +19,7 @@ var envCmd = &cobra.Command {
 			"create\tCreate environment\n" +
 			"update\tUpdate environment",
 	Run:	func(cmd *cobra.Command, args []string) {
-		fmt.Println("dummy env")
+		//fmt.Println("dummy env")
+		environment.GetAllEnvs()
 	},
 }
