@@ -8,6 +8,8 @@ import (
 	"os"
 	"fmt"
 	"text/tabwriter"
+	"net/url"
+	"net"
 )
 
 type Environment struct {
@@ -20,9 +22,13 @@ type Environment struct {
 
 
 func GetAllEnvs() {
-	url := viper.GetString("server.base-url") + "/environment"
+	queryUrl := viper.GetString("server.base-url") + "/environment"
+	_, err := url.ParseRequestURI(queryUrl)
+	if err != nil {
+		errorHandler(err)
+	}
 
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", queryUrl, nil)
 	if err != nil {
 		log.Fatal("NewRequest: ", err)
 		os.Exit(1)
@@ -31,7 +37,7 @@ func GetAllEnvs() {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal("Do: ", err)
+		errorHandler(err)
 		os.Exit(1)
 	}
 
@@ -45,7 +51,6 @@ func GetAllEnvs() {
 }
 
 func GetEnvById(envId string) {
-	//fmt.Println("NOT IMPLEMENTED")
 	url := viper.GetString("server.base-url") + "/environment/" + envId
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -57,7 +62,7 @@ func GetEnvById(envId string) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal("Do: ", err)
+		errorHandler(err)
 		os.Exit(1)
 	}
 
@@ -84,4 +89,26 @@ func printEnvs(allEnvironments []Environment) {
 	fmt.Fprintln(w)
 	w.Flush()
 
+}
+
+func errorHandler(err error) {
+	if ue, ok := err.(*url.Error); ok {
+		//handle connection refused error
+		switch uet := ue.Err.(type) {
+			//if oe, ok := ue.Err.(*net.OpError); ok {
+		case *net.OpError:
+				switch oet := uet.Err.(type) {
+				case *os.SyscallError:
+					//if se, ok := oe.Err.(*os.SyscallError); ok {
+						if oet.Err.Error() == "connection refused" {
+							log.Fatalf("Error: Connection refused when attempting to connect to scureshell server at %s", uet.Addr.(*net.TCPAddr))
+						}
+					//}
+			}
+		default:
+			if ue.Op == "parse" {
+				log.Fatalf("Error: Invalid URL provided for scureshell server - \"%s\"", ue.URL)
+			}
+		}
+	}
 }
