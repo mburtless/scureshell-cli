@@ -42,6 +42,9 @@ func GetAllEnvs() {
 	}
 
 	defer resp.Body.Close()
+	if resp.StatusCode > 299 || resp.StatusCode < 200 {
+		log.Fatal("Error: Invalid server response")
+	}
 	var allEnvironments []Environment
 	if err := json.NewDecoder(resp.Body).Decode(&allEnvironments); err != nil {
 		log.Println("Invalid JSON Response: ", err)
@@ -51,9 +54,15 @@ func GetAllEnvs() {
 }
 
 func GetEnvById(envId string) {
-	url := viper.GetString("server.base-url") + "/environment/" + envId
+	//need custom error on bad envId
 
-	req, err := http.NewRequest("GET", url, nil)
+	queryUrl := viper.GetString("server.base-url") + "/environment/" + envId
+	_, err := url.ParseRequestURI(queryUrl)
+	if err != nil {
+		errorHandler(err)
+	}
+
+	req, err := http.NewRequest("GET", queryUrl, nil)
 	if err != nil {
 		log.Fatal("NewRequest: ", err)
 		os.Exit(1)
@@ -67,6 +76,9 @@ func GetEnvById(envId string) {
 	}
 
 	defer resp.Body.Close()
+	if resp.StatusCode > 299 || resp.StatusCode < 200 {
+		log.Fatal("Error: Invalid server response")
+	}
 	var env Environment
 	var allEnvironments []Environment
 	if err := json.NewDecoder(resp.Body).Decode(&env); err != nil {
