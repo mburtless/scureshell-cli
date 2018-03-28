@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"fmt"
+	"github.com/mburtless/scureshell-cli/internal/pkg/request"
 )
 
 var ReqId string
@@ -17,7 +17,7 @@ var reqLs = &cobra.Command {
 	Short:	"List requests",
 	Long:	"List requests",
 	Run:	func(cmd *cobra.Command, args []string) {
-		fmt.Println("NOT IMPLEMENTED")
+		request.GetAllReqs()
 		/*if EnvId != "" {
 			environment.GetEnvById(EnvId)
 		} else {

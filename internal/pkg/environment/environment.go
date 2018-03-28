@@ -8,8 +8,10 @@ import (
 	"os"
 	"fmt"
 	"text/tabwriter"
-	"net/url"
-	"net"
+	//"net/url"
+	//"net"
+	"github.com/mburtless/scureshell-cli/internal/pkg/validationHelper"
+	"github.com/mburtless/scureshell-cli/internal/pkg/errorHandler"
 )
 
 type Environment struct {
@@ -23,22 +25,21 @@ type Environment struct {
 
 func GetAllEnvs() {
 	queryUrl := viper.GetString("server.base-url") + "/environment"
-	_, err := url.ParseRequestURI(queryUrl)
+
+	_, err := validationHelper.Url(queryUrl)
 	if err != nil {
-		errorHandler(err)
+		errorHandler.Handle(err)
 	}
 
 	req, err := http.NewRequest("GET", queryUrl, nil)
 	if err != nil {
 		log.Fatal("NewRequest: ", err)
-		os.Exit(1)
 	}
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		errorHandler(err)
-		os.Exit(1)
+		errorHandler.Handle(err)
 	}
 
 	defer resp.Body.Close()
@@ -55,24 +56,27 @@ func GetAllEnvs() {
 
 func GetEnvById(envId string) {
 	//need custom error on bad envId
+	/*_, err := validationHelper.environmentId(envId)
+	if err != nil {
+		errorHandler.Handle(err)
+	}*/
 
 	queryUrl := viper.GetString("server.base-url") + "/environment/" + envId
-	_, err := url.ParseRequestURI(queryUrl)
+
+	_, err := validationHelper.Url(queryUrl)
 	if err != nil {
-		errorHandler(err)
+		errorHandler.Handle(err)
 	}
 
 	req, err := http.NewRequest("GET", queryUrl, nil)
 	if err != nil {
 		log.Fatal("NewRequest: ", err)
-		os.Exit(1)
 	}
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		errorHandler(err)
-		os.Exit(1)
+		errorHandler.Handle(err)
 	}
 
 	defer resp.Body.Close()
@@ -101,26 +105,4 @@ func printEnvs(allEnvironments []Environment) {
 	fmt.Fprintln(w)
 	w.Flush()
 
-}
-
-func errorHandler(err error) {
-	if ue, ok := err.(*url.Error); ok {
-		//handle connection refused error
-		switch uet := ue.Err.(type) {
-			//if oe, ok := ue.Err.(*net.OpError); ok {
-		case *net.OpError:
-				switch oet := uet.Err.(type) {
-				case *os.SyscallError:
-					//if se, ok := oe.Err.(*os.SyscallError); ok {
-						if oet.Err.Error() == "connection refused" {
-							log.Fatalf("Error: Connection refused when attempting to connect to scureshell server at %s", uet.Addr.(*net.TCPAddr))
-						}
-					//}
-			}
-		default:
-			if ue.Op == "parse" {
-				log.Fatalf("Error: Invalid URL provided for scureshell server - \"%s\"", ue.URL)
-			}
-		}
-	}
 }
