@@ -14,8 +14,8 @@ import (
 )
 
 type PostRes struct {
-	Message       string  `json:"message"`
-	Request      RequestRes `json:"request"`
+	Message       string     `json:"message"`
+	Request       RequestRes `json:"request"`
 }
 
 type RequestRes struct {
