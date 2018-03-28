@@ -17,11 +17,10 @@ var reqLs = &cobra.Command {
 	Short:	"List requests",
 	Long:	"List requests",
 	Run:	func(cmd *cobra.Command, args []string) {
-		request.GetAllReqs()
-		/*if EnvId != "" {
-			environment.GetEnvById(EnvId)
+		if ReqId != "" {
+			request.GetReqById(ReqId)
 		} else {
-			environment.GetAllEnvs()
-		}*/
+			request.GetAllReqs()
+		}
 	},
 }
