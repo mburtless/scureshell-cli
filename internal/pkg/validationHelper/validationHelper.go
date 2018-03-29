@@ -21,3 +21,16 @@ func File(f string) (bool, error) {
 		return true, nil
 	}
 }
+
+func FileExists(f string) (bool, error) {
+	if _, err := os.Stat(f); os.IsNotExist(err) {
+		return false, err
+	} else {
+		return true, nil
+	}
+	/*if _, err := os.Stat(f); err != nil {
+		return true, nil
+	} else {
+		return false, err
+	}*/
+}

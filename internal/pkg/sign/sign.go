@@ -47,9 +47,15 @@ func Request(params *SignParams) {
 		errorHandler.Handle(err)
 	}
 
-	_, err = validationHelper.File(params.PubKeyFilename)
+	_, err = validationHelper.FileExists(params.PubKeyFilename)
 	if err != nil {
 		log.Fatalf("Error: Public key file %s could not be found", params.PubKeyFilename)
+	}
+
+	certFilename := params.PubKeyFilename[0:len(params.PubKeyFilename)-4] + "-cert.pub"
+	b, _ := validationHelper.FileExists(certFilename)
+	if b == true {
+		log.Fatalf("Error: Cert %s already exists", certFilename)
 	}
 
 	//Read public key file to string
@@ -98,8 +104,21 @@ func Request(params *SignParams) {
 
 	if postRes.Status == 200 {
 		//printReqs([]RequestRes{postRes.Request})
-		log.Printf("%v", postRes.Data[0].Signedkey)
+		//write params.pubkeyfilename-cert.pub here
+		err = writeCert(&certFilename, &postRes.Data[0].Signedkey)
+		if err != nil {
+			log.Fatalf("Error: Couldn't save SSH certificate to %s", certFilename)
+		}
 	} else {
 		log.Fatalf("Error: Public key could not be signed\n%s", postRes.Message)
 	}
+}
+
+func writeCert(f *string, signedKey *string) error {
+	err := ioutil.WriteFile(*(f), []byte(*(signedKey)), 0644)
+	if err != nil {
+		return err
+	}
+	//log.Printf("%v", signedKey)
+	return nil
 }
