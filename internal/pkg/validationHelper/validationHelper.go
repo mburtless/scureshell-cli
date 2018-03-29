@@ -28,9 +28,4 @@ func FileExists(f string) (bool, error) {
 	} else {
 		return true, nil
 	}
-	/*if _, err := os.Stat(f); err != nil {
-		return true, nil
-	} else {
-		return false, err
-	}*/
 }

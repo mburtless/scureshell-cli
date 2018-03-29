@@ -79,7 +79,6 @@ func Request(params *SignParams) {
 		log.Fatal("JSON err: ", err)
 	}
 
-	//log.Printf("%#v", signJson)
 	req, err := http.NewRequest("POST", queryUrl, bytes.NewBuffer(signJson))
 	req.Header.Set("Content-Type", "application/json")
 	if err != nil {
@@ -103,8 +102,6 @@ func Request(params *SignParams) {
 	}
 
 	if postRes.Status == 200 {
-		//printReqs([]RequestRes{postRes.Request})
-		//write params.pubkeyfilename-cert.pub here
 		err = writeCert(&certFilename, &postRes.Data[0].Signedkey)
 		if err != nil {
 			log.Fatalf("Error: Couldn't save SSH certificate to %s", certFilename)
@@ -119,6 +116,5 @@ func writeCert(f *string, signedKey *string) error {
 	if err != nil {
 		return err
 	}
-	//log.Printf("%v", signedKey)
 	return nil
 }
